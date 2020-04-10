@@ -14,7 +14,23 @@ function SpaceShip:init()
     self.width = 34
     self.height = 38
 
+    -- controls the ships movement speed
     self.shipSpeed = 100
+
+    -- set starting hp for ship
+    self.hp = 5
+
+    -- a list holding all the ships lasers
+    self.lasers = {}
+    self.shotTimer = 0
+    self.pauseShot = false
+
+    -- count time in seconds
+    Timer.every(0.5, function()
+        self.shotTimer = self.shotTimer + 1
+    end)
+
+
 end
 
 function SpaceShip:collides( target )
@@ -32,7 +48,30 @@ function SpaceShip:collides( target )
 end
 
 function SpaceShip:update( dt )
-    -- keyboard input
+    -- update ship movement
+    self:movement(dt)
+
+    -- check if ship shot and update laser list
+    self:shoot(dt)
+
+    -- update ships lasers
+    for l, laser in pairs(self.lasers) do
+        laser:update(dt)
+    end
+end
+
+function SpaceShip:render()
+    -- render ship
+    love.graphics.draw(gTextures['space-ships'], self.x, self.y)
+
+    -- render laser
+    for l, laser in pairs(self.lasers) do
+        laser:render()
+    end
+end
+
+function SpaceShip:movement( dt )
+    -- keyboard input forward and backward
     if love.keyboard.isDown('a') then
         self.dx = -self.shipSpeed
     elseif love.keyboard.isDown('d') then
@@ -41,6 +80,7 @@ function SpaceShip:update( dt )
         self.dx = 0
     end
 
+    -- keyboard input up and down
     if love.keyboard.isDown('w') then 
         self.dy = -self.shipSpeed
     elseif love.keyboard.isDown('s') then 
@@ -49,6 +89,7 @@ function SpaceShip:update( dt )
         self.dy = 0
     end
 
+    -- changes speed based on input
     if self.dx < 0 then
         self.x = math.max(0, self.x + self.dx * dt)
     else
@@ -62,6 +103,16 @@ function SpaceShip:update( dt )
     end
 end
 
-function SpaceShip:render()
-    love.graphics.draw(gTextures['space-ships'], self.x, self.y)
+function SpaceShip:shoot(dt)
+    -- adds a laser to the ships lasers list
+    if love.keyboard.isDown('space') and not self.pauseShot then
+        table.insert( self.lasers, Laser(self.x, self.y, self.width, self.height))
+        table.insert( self.lasers, Laser(self.x, self.y + 23, self.width, self.height))
+        self.pauseShot = true
+        self.shotTimer = 0
+    end
+
+    if self.shotTimer >= 1 then
+        self.pauseShot = false
+    end   
 end

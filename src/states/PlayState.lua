@@ -50,6 +50,10 @@ function PlayState:update( dt )
         love.event.quit()
     end
 
+    if self.timer >= 30 then
+        gStateMachine:change('victory')
+    end
+
     -- spawn object into scene
     if self.spawnTime >= self.spawnRate then
         table.insert( self.objects, Meteor(math.random( 1, 3 )))
@@ -98,7 +102,15 @@ function PlayState:render()
         object:render()
     end
 
+    -- render player hp
+    self:displayHud(self.player.hp)
+
     -- draw our transition rect; is normally fully transparent, unless we're moving to a new state
     love.graphics.setColor(1, 1, 1, self.transitionAlpha)
     love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+end
+
+function PlayState:displayHud( hp )
+    love.graphics.draw(gTextures['health-bar'], gFrames['health'][1], 10, VIRTUAL_HEIGHT - 42)
+    love.graphics.draw(gTextures['health-bar'], gFrames['health'][hp + 1], 20, VIRTUAL_HEIGHT - 34)
 end

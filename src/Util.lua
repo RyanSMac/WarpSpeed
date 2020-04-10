@@ -36,3 +36,29 @@ function GenerateQuadsMeteors( atlas )
     return quads
 
 end
+
+function GenerateQuadsHealth( atlas )
+    local x = 0
+    local y = 0
+    local width = 16
+
+    local counter = 1
+    local quads = {}
+    
+    quads[counter] = love.graphics.newQuad(x, y, 98, 32,
+        atlas:getDimensions())
+    counter = counter + 1
+
+    x = x + 98
+    y = y + 8
+
+    for i=1,5 do
+        quads[counter] = love.graphics.newQuad(x, y, width, 18,
+            atlas:getDimensions())
+        counter = counter + 1
+
+        width = width + 16
+    end
+
+    return quads
+end

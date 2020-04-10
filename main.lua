@@ -4,14 +4,6 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 -- File containing everything other file the game needs to run
 require 'src/Dependencies'
 
--- Physical screen dimensions
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-
--- virtual resolution dimensions
-VIRTUAL_WIDTH = 512
-VIRTUAL_HEIGHT = 288
-
 function love.load()
     
     -- window bar title
@@ -28,16 +20,21 @@ function love.load()
         canvas = true
     })
 
+    -- set up the games state machine
     gStateMachine = StateMachine {
         ['start'] = function() return StartState() end,
         ['play'] = function() return PlayState() end,
+        ['victory'] = function() return VictoryState() end,
         ['game-over'] = function() return GameOverState() end
     }
 
+    -- change to the start to begin the game
     gStateMachine:change('start')
 
+    -- set up list to store all keyboard presses
     love.keyboard.keysPressed = {}
 
+    -- set up list to store all mouse presses
     love.mouse.buttonsPressed = {}
 end
 
@@ -57,6 +54,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.keyboard.wasPressed(key)
+    -- check is a key was pressed on the keyboard
     if love.keyboard.keysPressed[key] then
         return true
     else
@@ -65,6 +63,7 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.mouse.wasPressed(button)
+    -- check if a key was pressed on the mouse
     if love.mouse.buttonsPressed[button] then
         return true
     else
@@ -73,8 +72,10 @@ function love.mouse.wasPressed(button)
 end
 
 function love.update( dt )
+    -- update for which ever state the game is currently in
     gStateMachine:update(dt)
 
+    -- empty both the input lists
     love.keyboard.keysPressed = {}
     love.mouse.buttonsPressed = {}
 end
@@ -82,7 +83,20 @@ end
 function love.draw()
     push:start()
 
+    -- render for which ever state the game is currently in
     gStateMachine:render()
 
+    -- display FPS for debugging; simply comment out to remove
+    displayFPS()
+
     push:finish()
+end
+
+--[[
+    Renders the current FPS.
+]]
+function displayFPS()
+    -- simple FPS display across all states
+    love.graphics.setColor(0, 255, 0, 255)
+    love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 5, 5)
 end
